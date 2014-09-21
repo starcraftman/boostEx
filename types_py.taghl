@@ -1,0 +1,5 @@
+syn keyword CTagsMember push pop
+syn keyword CTagsGlobalVariable dirs URL_BOOST DB COMPILATION_DB_FOLDER FLAGS HEADER_EXTENSIONS URL_GTEST NUM_JOBS SOURCE_EXTENSIONS
+syn keyword CTagsFunction get_archive main build_boost GetCompilationInfoForFile FlagsForFile build_cunit build_src IsHeaderFile build_sdl1 get_code build_gtest build_sdl2 MakeRelativePathsInFlagsAbsolute
+syn keyword CTagsClass PDir ArchiveException
+

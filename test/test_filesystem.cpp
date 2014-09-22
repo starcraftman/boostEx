@@ -6,7 +6,7 @@
 /* C++ Headers */
 #include <iostream> /* Input/output objects. */
 //#include <fstream> /* File operations. */
-#include <sstream> /* String stream. */
+//#include <sstream> /* String stream. */
 #include <string> /* C++ String class. */
 //#include <new> /* Defines bad_malloc exception, new functions. */
 //#include <typeinfo> /* Casting header. */
@@ -98,22 +98,46 @@ TEST(BoostFilesystem, TestQueries) {
 TEST(BoostFilesystem, TestDirectoryIterator) {
     using boost::filesystem::directory_iterator;
     using boost::filesystem::directory_entry;
-    using std::ostream_iterator;
+    typedef std::vector<string> vecS;
 
-    boost::filesystem::path pd("./test");
-    std::vector<string> vActual;
-    std::vector<string> vExpect {"\"./test/gtest_example_primer.cpp\"", "\"./test/test_foreach.cpp\"", "\"./test/test_filesystem.cpp\"", "\"./test/CMakeLists.txt\"", "\"./test/test_main.cpp\"", "\"./test/test_circle_buffer.cpp\""};
+    boost::filesystem::path pd("./src");
+    vecS vActual;
+    vecS vExpect {"./src/CMakeLists.txt", "./src/class1.cpp", "./src/main.cpp"};
 
     for (directory_iterator itr(pd); itr != directory_iterator(); ++itr) {
-	std::stringstream ss;
-	ss << *itr;
-	vActual.push_back(ss.str());
+	string path = itr->path().c_str();
+	vActual.push_back(path);
     }
 
     std::sort(vActual.begin(), vActual.end());
     std::sort(vExpect.begin(), vExpect.end());
 
-    for ( std::vector<string>::const_iterator itA =  vActual.begin(), itE = vExpect.begin() ; itA != vActual.end(); ++itA, ++itE) {
+    for (vecS::const_iterator itA =  vActual.begin(), itE = vExpect.begin();
+	    itA != vActual.end(); ++itA, ++itE) {
+	ASSERT_STREQ(itE->c_str(), itA->c_str());
+    }
+}
+
+TEST(BoostFilesystem, TestPathDecomposition) {
+    using boost::filesystem::directory_iterator;
+    using boost::filesystem::directory_entry;
+    typedef std::vector<string> vecS;
+    //typedef std::vector<boost::filesystem::path> vecP;
+
+    boost::filesystem::path pd("./src");
+    vecS vActual;
+    vecS vExpect {"CMakeLists.txt", "class1.cpp", "main.cpp"};
+
+    for (directory_iterator itr(pd); itr != directory_iterator(); ++itr) {
+	string fName = itr->path().filename().c_str();
+	vActual.push_back(fName);
+    }
+
+    std::sort(vActual.begin(), vActual.end());
+    std::sort(vExpect.begin(), vExpect.end());
+
+    for (vecS::const_iterator itA =  vActual.begin(), itE = vExpect.begin();
+	    itA != vActual.end(); ++itA, ++itE) {
 	ASSERT_STREQ(itE->c_str(), itA->c_str());
     }
 }

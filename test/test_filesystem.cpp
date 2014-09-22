@@ -51,6 +51,7 @@ using std::cin;
 using std::cout;
 using std::endl;
 using std::string;
+namespace fs = boost::filesystem;
 
 /******************* Type Definitions *********************/
 /* For enums: Try to namesapce the common elements.
@@ -78,33 +79,26 @@ TEST(BoostFilesystem, TestFilesize) {
 }
 
 TEST(BoostFilesystem, TestQueries) {
-    using boost::filesystem::exists;
-    using boost::filesystem::is_regular_file;
-    using boost::filesystem::path;
-    using boost::filesystem::is_directory;
-
     string fil("./test/gtest_example_primer.cpp");
     string tdir("./test");
-    path pf(fil);
-    path pd(tdir);
+    fs::path pf(fil);
+    fs::path pd(tdir);
 
-    ASSERT_TRUE(exists(pf));
-    ASSERT_TRUE(is_regular_file(pf));
-    ASSERT_TRUE(exists(pd));
-    ASSERT_FALSE(is_regular_file(pd));
-    ASSERT_TRUE(is_directory(pd));
+    ASSERT_TRUE(fs::exists(pf));
+    ASSERT_TRUE(fs::is_regular_file(pf));
+    ASSERT_TRUE(fs::exists(pd));
+    ASSERT_FALSE(fs::is_regular_file(pd));
+    ASSERT_TRUE(fs::is_directory(pd));
 }
 
 TEST(BoostFilesystem, TestDirectoryIterator) {
-    using boost::filesystem::directory_iterator;
-    using boost::filesystem::directory_entry;
     typedef std::vector<string> vecS;
 
-    boost::filesystem::path pd("./src");
+    fs::path pd("./src");
     vecS vActual;
     vecS vExpect {"./src/CMakeLists.txt", "./src/class1.cpp", "./src/main.cpp"};
 
-    for (directory_iterator itr(pd); itr != directory_iterator(); ++itr) {
+    for (fs::directory_iterator itr(pd); itr != fs::directory_iterator(); ++itr) {
 	string path = itr->path().c_str();
 	vActual.push_back(path);
     }
@@ -119,16 +113,13 @@ TEST(BoostFilesystem, TestDirectoryIterator) {
 }
 
 TEST(BoostFilesystem, TestPathDecomposition) {
-    using boost::filesystem::directory_iterator;
-    using boost::filesystem::directory_entry;
     typedef std::vector<string> vecS;
-    //typedef std::vector<boost::filesystem::path> vecP;
 
-    boost::filesystem::path pd("./src");
+    fs::path pd("./src");
     vecS vActual;
     vecS vExpect {"CMakeLists.txt", "class1.cpp", "main.cpp"};
 
-    for (directory_iterator itr(pd); itr != directory_iterator(); ++itr) {
+    for (fs::directory_iterator itr(pd); itr != fs::directory_iterator(); ++itr) {
 	string fName = itr->path().filename().c_str();
 	vActual.push_back(fName);
     }

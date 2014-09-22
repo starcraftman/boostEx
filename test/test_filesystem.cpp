@@ -66,27 +66,37 @@ using std::string;
  */
 
 /****************** Class Definitions *********************/
-//class BoostCircleTest : public ::testing::Test {
-//protected:
-    //virtual void SetUp() {
-	//cb.resize(3);
-	//int vals[] = {1, 2, 3};
 
-	//for (int i = 0; i < 3; ++i) {
-	    //cb.push_back(vals[i]);
-	//}
-    //}
-
-    //virtual void TearDown() {
-    //}
-
-    //boost::circular_buffer<int> cb;
-//};
 
 /****************** Global Functions **********************/
 TEST(BoostFilesystem, TestFilesize) {
-    string fil("GetLibs.py");
-    ASSERT_EQ(8292, boost::filesystem::file_size(fil));
+    string fil("./test/gtest_example_primer.cpp");
+    ASSERT_EQ(3666, boost::filesystem::file_size(fil));
+
+    ASSERT_THROW(boost::filesystem::file_size("."), 
+	    boost::filesystem::filesystem_error);
+}
+
+TEST(BoostFilesystem, TestQueries) {
+    using boost::filesystem::exists;
+    using boost::filesystem::is_regular_file;
+    using boost::filesystem::path;
+    using boost::filesystem::is_directory;
+
+    string fil("./test/gtest_example_primer.cpp");
+    string tdir("./test");
+    path pf(fil);
+    path pd(tdir);
+    
+    ASSERT_TRUE(exists(pf)); 
+    ASSERT_TRUE(is_regular_file(pf));
+    ASSERT_TRUE(exists(pd));
+    ASSERT_FALSE(is_regular_file(pd));
+    ASSERT_TRUE(is_directory(pd));
+}
+
+TEST(BoostFilesystem, TestFilesystemExceptions) {
+    ASSERT_TRUE(true);
 }
 
 /* Notes:

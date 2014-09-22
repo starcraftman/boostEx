@@ -6,7 +6,7 @@
 /* C++ Headers */
 #include <iostream> /* Input/output objects. */
 //#include <fstream> /* File operations. */
-//#include <sstream> [> String stream. <]
+#include <sstream> /* String stream. */
 #include <string> /* C++ String class. */
 //#include <new> /* Defines bad_malloc exception, new functions. */
 //#include <typeinfo> /* Casting header. */
@@ -14,7 +14,7 @@
 //#include <stdexcept> /* Derived exception classes. */
 
 /* STL Headers */
-//#include <vector>
+#include <vector>
 //#include <list>
 //#include <deque>
 //#include <stack>
@@ -73,8 +73,8 @@ TEST(BoostFilesystem, TestFilesize) {
     string fil("./test/gtest_example_primer.cpp");
     ASSERT_EQ(3666, boost::filesystem::file_size(fil));
 
-    ASSERT_THROW(boost::filesystem::file_size("."), 
-	    boost::filesystem::filesystem_error);
+    ASSERT_THROW(boost::filesystem::file_size("."),
+	boost::filesystem::filesystem_error);
 }
 
 TEST(BoostFilesystem, TestQueries) {
@@ -87,16 +87,32 @@ TEST(BoostFilesystem, TestQueries) {
     string tdir("./test");
     path pf(fil);
     path pd(tdir);
-    
-    ASSERT_TRUE(exists(pf)); 
+
+    ASSERT_TRUE(exists(pf));
     ASSERT_TRUE(is_regular_file(pf));
     ASSERT_TRUE(exists(pd));
     ASSERT_FALSE(is_regular_file(pd));
     ASSERT_TRUE(is_directory(pd));
 }
 
-TEST(BoostFilesystem, TestFilesystemExceptions) {
-    ASSERT_TRUE(true);
+TEST(BoostFilesystem, TestDirectoryIterator) {
+    using boost::filesystem::directory_iterator;
+    using boost::filesystem::directory_entry;
+    using std::ostream_iterator;
+
+    boost::filesystem::path pd("./test");
+    std::vector<string> vActual;
+    std::vector<string> vExpect {"\"./test/gtest_example_primer.cpp\"", "\"./test/test_foreach.cpp\"", "\"./test/test_filesystem.cpp\"", "\"./test/CMakeLists.txt\"", "\"./test/test_main.cpp\"", "\"./test/test_circle_buffer.cpp\""};
+
+    for (directory_iterator itr(pd); itr != directory_iterator(); ++itr) {
+	std::stringstream ss;
+	ss << *itr;
+	vActual.push_back(ss.str());
+    }
+
+    for ( std::vector<string>::const_iterator itA =  vActual.begin(), itE = vExpect.begin() ; itA != vActual.end(); ++itA, ++itE) {
+	ASSERT_STREQ(itE->c_str(), itA->c_str());
+    }
 }
 
 /* Notes:

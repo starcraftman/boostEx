@@ -6,7 +6,7 @@
 /* C++ Headers */
 #include <iostream> /* Input/output objects. */
 //#include <fstream> /* File operations. */
-#include <sstream> /* String stream. */
+//#include <sstream> [> String stream. <]
 #include <string> /* C++ String class. */
 //#include <new> /* Defines bad_malloc exception, new functions. */
 //#include <typeinfo> /* Casting header. */
@@ -39,8 +39,8 @@
 //#include <cassert>
 
 /* Project Headers */
-#include <boost/circular_buffer.hpp>
 #include <boost/foreach.hpp>
+#include <boost/filesystem.hpp>
 #include <gtest/gtest.h>
 
 /******************* Constants/Macros *********************/
@@ -84,7 +84,10 @@ using std::string;
 //};
 
 /****************** Global Functions **********************/
-
+TEST(BoostFilesystem, TestFilesize) {
+    string fil("GetLibs.py");
+    ASSERT_EQ(8292, boost::filesystem::file_size(fil));
+}
 
 /* Notes:
  * Force call to use another version of virtual function: baseP->Item_base::net_price(42);

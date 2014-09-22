@@ -4,6 +4,7 @@ SET(TEST_SOURCES
     "${CMAKE_CURRENT_SOURCE_DIR}/test_main.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/test_circle_buffer.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/test_foreach.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/test_filesystem.cpp"
     PARENT_SCOPE
 )
 

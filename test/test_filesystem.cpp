@@ -110,6 +110,9 @@ TEST(BoostFilesystem, TestDirectoryIterator) {
 	vActual.push_back(ss.str());
     }
 
+    std::sort(vActual.begin(), vActual.end());
+    std::sort(vExpect.begin(), vExpect.end());
+
     for ( std::vector<string>::const_iterator itA =  vActual.begin(), itE = vExpect.begin() ; itA != vActual.end(); ++itA, ++itE) {
 	ASSERT_STREQ(itE->c_str(), itA->c_str());
     }

@@ -90,10 +90,8 @@ TEST(BoostFilesystem, TestQueries) {
     ASSERT_FALSE(fs::is_regular_file(pd));
     ASSERT_TRUE(fs::is_directory(pd));
 }
-
 TEST(BoostFilesystem, TestDirectoryIterator) {
     typedef std::vector<string> vecS;
-
     fs::path pd("./src");
     vecS vActual;
     vecS vExpect {"./src/CMakeLists.txt", "./src/class1.cpp", "./src/main.cpp"};
@@ -114,7 +112,6 @@ TEST(BoostFilesystem, TestDirectoryIterator) {
 
 TEST(BoostFilesystem, TestPathDecomposition) {
     typedef std::vector<string> vecS;
-
     fs::path pd("./src");
     vecS vActual;
     vecS vExpect {"CMakeLists.txt", "class1.cpp", "main.cpp"};
@@ -131,6 +128,18 @@ TEST(BoostFilesystem, TestPathDecomposition) {
 	    itA != vActual.end(); ++itA, ++itE) {
 	ASSERT_STREQ(itE->c_str(), itA->c_str());
     }
+}
+
+TEST(BoostFilesystem, TestComposePath) {
+    std::string parts[] = {"/usr", "lib", "xorg", "modules", "libfb.so"};
+    std::string expect = "/usr/lib/xorg/modules/libfb.so";
+    fs::path p;
+
+    for (int i = 0; i < 5; ++i) {
+	p /= parts[i].c_str();
+    }
+
+    ASSERT_STREQ(expect.c_str(), p.c_str());
 }
 
 /* Notes:

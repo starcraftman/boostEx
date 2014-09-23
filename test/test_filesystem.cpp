@@ -1,6 +1,6 @@
 /**
- * Template C++ file.
- * Function with references to pointers: func(int *&ptr);
+ * Filesystem lib from boost.
+ * See http://www.boost.org/doc/libs/1_56_0/libs/filesystem/doc/tutorial.html
  */
 /********************* Header Files ***********************/
 /* C++ Headers */

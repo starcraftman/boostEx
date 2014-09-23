@@ -6,7 +6,7 @@
 /* C++ Headers */
 #include <iostream> /* Input/output objects. */
 //#include <fstream> /* File operations. */
-//#include <sstream> /* String stream. */
+#include <sstream> /* String stream. */
 #include <string> /* C++ String class. */
 //#include <new> /* Defines bad_malloc exception, new functions. */
 //#include <typeinfo> /* Casting header. */
@@ -70,9 +70,50 @@ namespace d = ::boost::gregorian;
 
 
 /****************** Global Functions **********************/
-TEST(BoostDateTime, SimpleDate) {
-    d::date weekStart(2002, d::Feb, 1);
-    cout << weekStart;
+void datesEqual(const d::date &dateExpect, const d::date &dateActual) {
+    std::stringstream ssA, ssE;
+
+    ssE << dateExpect;
+    ssA << dateActual;
+
+    ASSERT_STREQ(ssE.str().c_str(), ssA.str().c_str());
+}
+
+TEST(BoostDateTime, DateSimpleCreate) {
+    std::stringstream ss;
+    d::date date1(2002, d::Feb, 1);
+
+    ss << date1;
+    ASSERT_STREQ("2002-Feb-01", ss.str().c_str());
+}
+
+TEST(BoostDateTime, DateArithmetic) {
+    d::date dateStart(2002, d::Feb, 1), dateExpect(2004, d::Feb, 3);
+    d::date dateActual = dateStart + d::years(2) + d::days(2);
+
+    datesEqual(dateExpect, dateActual);
+}
+
+TEST(BoostDateTime, DateIterator) {
+    std::vector<d::date> vExpect = {d::date(2002, d::Feb, 1),
+	d::date(2002, d::Feb, 2), d::date(2002, d::Feb, 3),
+	d::date(2002, d::Feb, 4), d::date(2002, d::Feb, 5),
+    };
+    d::date dateStart(2002, d::Feb, 1), dateEnd(2002, d::Feb, 6);
+
+    /* Iterate the days from a start to end */
+    std::vector<d::date>::const_iterator itE = vExpect.begin();
+    for(d::day_iterator itA(dateStart); itA != dateEnd; ++itA, ++itE) {
+	datesEqual(*itE, *itA);
+    }
+}
+
+TEST(BoostDateTime, DateGenerator) {
+    d::date dateStart(2002, d::Feb, 1);
+    d::date dateExpect(2002, d::Feb, 7);
+    d::date dateActual = d::next_weekday(dateStart, d::greg_weekday(d::Thursday));
+
+    datesEqual(dateExpect, dateActual);
 }
 
 /* Notes:

@@ -1,10 +1,11 @@
 SET(TEST_SOURCES
     ${TEST_SOURCES}
     #"${CMAKE_CURRENT_SOURCE_DIR}/gtest_example_primer.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/test_main.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/test_circle_buffer.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/test_foreach.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/test_filesystem.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/main_test.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/circle_buffer_test.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/foreach_test.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/filesystem_test.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/date_time_test.cpp"
     PARENT_SCOPE
 )
 

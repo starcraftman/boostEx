@@ -151,11 +151,22 @@ TEST(BoostDateTimeZone, SimpleConversion) {
     lt::tz_database tzDb;
     tzDb.load_from_file(
 	"libs/share/boost/date_time/date_time_zonespec.csv");
+    lt::time_zone_ptr nycTz = tzDb.time_zone_from_region("America/New_York");
+    lt::time_zone_ptr phxTz(new lt::posix_time_zone("MST-07:00:00"));
 
-    lt::time_zone_ptr nyc = tzDb.time_zone_from_region("America/New York");
-    lt::time_zone_ptr phz(lt::posix_time_zone("MST-07:00:00"));
+    lt::local_date_time phxDeparture(d::date(2005, d::Apr, 2), pt::hours(23),
+	phxTz, lt::local_date_time::NOT_DATE_TIME_ON_ERROR);
+    pt::time_duration flight_length = pt::hours(4) + pt::minutes(30);
+    lt::local_date_time phxArrival = phxDeparture + flight_length;
 
-    lt::local_date_time phzDeparture;
+    string tExpectDepartPHX("2005-Apr-02 23:00:00 MST");
+    string tExpectArrivalNYC("2005-Apr-03 06:30:00 EDT");
+    std::stringstream ssP, ssN;
+    ssP << phxDeparture;
+    ssN << phxArrival.local_time_in(nycTz);
+
+    ASSERT_STREQ(tExpectDepartPHX.c_str(), ssP.str().c_str());
+    ASSERT_STREQ(tExpectArrivalNYC.c_str(), ssN.str().c_str());
 }
 
 /* Notes:

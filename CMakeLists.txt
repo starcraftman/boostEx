@@ -8,7 +8,7 @@ SET(BOOST_ROOT  "${CMAKE_SOURCE_DIR}/libs")
 SET(GTEST_ROOT  "${BOOST_ROOT}")
 SET(B_LIB    "blib")
 
-FIND_PACKAGE(Boost 1.56.0 REQUIRED date_time filesystem system thread)
+FIND_PACKAGE(Boost 1.56.0 REQUIRED chrono date_time filesystem system thread)
 FIND_PACKAGE(GTest 1.7 REQUIRED)
 FIND_PACKAGE(Threads REQUIRED)
 

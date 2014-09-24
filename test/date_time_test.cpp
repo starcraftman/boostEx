@@ -135,6 +135,29 @@ TEST(BoostDatePosixTime, SimpleCreate) {
     datesEqual<pt::ptime>(timeExpect, timeActual);
 }
 
+TEST(BoostDatePosixTime, InputCreate) {
+    string expect("2002-Feb-01 05:00:00");
+    std::stringstream ss;
+    ss << expect;
+
+    pt::ptime timeExpect(pt::time_from_string(expect));
+    pt::ptime timeActual;
+    ss >> timeActual;
+
+    datesEqual<pt::ptime>(timeExpect, timeActual);
+}
+
+TEST(BoostDateTimeZone, SimpleConversion) {
+    lt::tz_database tzDb;
+    tzDb.load_from_file(
+	"libs/share/boost/date_time/date_time_zonespec.csv");
+
+    lt::time_zone_ptr nyc = tzDb.time_zone_from_region("America/New York");
+    lt::time_zone_ptr phz(lt::posix_time_zone("MST-07:00:00"));
+
+    lt::local_date_time phzDeparture;
+}
+
 /* Notes:
  * Force call to use another version of virtual function: baseP->Item_base::net_price(42);
  *

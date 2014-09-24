@@ -72,11 +72,11 @@ namespace lt = ::boost::local_time;
 
 
 /****************** Global Functions **********************/
-void datesEqual(const d::date &dateExpect, const d::date &dateActual) {
+template<typename T>
+void datesEqual(const T &expect, const T &actual) {
     std::stringstream ssA, ssE;
-
-    ssE << dateExpect;
-    ssA << dateActual;
+    ssE << expect;
+    ssA << actual;
 
     ASSERT_STREQ(ssE.str().c_str(), ssA.str().c_str());
 }
@@ -93,7 +93,7 @@ TEST(BoostDateGregorian, Arithmetic) {
     d::date dateStart(2002, d::Feb, 1), dateExpect(2004, d::Feb, 3);
     d::date dateActual = dateStart + d::years(2) + d::days(2);
 
-    datesEqual(dateExpect, dateActual);
+    datesEqual<d::date>(dateExpect, dateActual);
 }
 
 TEST(BoostDateGregorian, DaysIterator) {
@@ -106,7 +106,7 @@ TEST(BoostDateGregorian, DaysIterator) {
     /* Iterate the days from a start to end */
     std::vector<d::date>::const_iterator itE = vExpect.begin();
     for(d::day_iterator itA(dateStart); itA != dateEnd; ++itA, ++itE) {
-	datesEqual(*itE, *itA);
+	datesEqual<d::date>(*itE, *itA);
     }
 }
 
@@ -115,7 +115,7 @@ TEST(BoostDateGregorian, DateGenerator) {
     d::date dateExpect(2002, d::Feb, 7);
     d::date dateActual = d::next_weekday(dateStart, d::greg_weekday(d::Thursday));
 
-    datesEqual(dateExpect, dateActual);
+    datesEqual<d::date>(dateExpect, dateActual);
 }
 
 TEST(BoostDateGregorian, DateNextDay) {
@@ -123,15 +123,16 @@ TEST(BoostDateGregorian, DateNextDay) {
     typedef d::nth_day_of_the_week_in_month nth_dow;
     nth_dow laborDay(nth_dow::first, d::Monday, d::Sep);
 
-    datesEqual(dateExpect, laborDay.get_date(2004));
+    datesEqual<d::date>(dateExpect, laborDay.get_date(2004));
 }
 
 TEST(BoostDatePosixTime, SimpleCreate) {
     d::date dateStart(2002, d::Feb, 1);
-    pt::ptime t1(dateStart, pt::hours(5));
+    pt::ptime timeActual(dateStart, pt::hours(5));
+    string expect("2002-Feb-01 05:00:00");
+    pt::ptime timeExpect(pt::time_from_string(expect));
 
-    pt::ptime now = pt::second_clock::local_time();
-    cout << now << endl << now.time_of_day();
+    datesEqual<pt::ptime>(timeExpect, timeActual);
 }
 
 /* Notes:

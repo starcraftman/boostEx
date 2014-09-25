@@ -67,27 +67,66 @@ using std::string;
  */
 
 /****************** Class Definitions *********************/
+double computeRoot(double num, double guess, int iterations);
 
+class Worker {
+public:
+    Worker(double num, double guess, int iterations) :
+        _num(num), _guess(guess), _iterations(iterations) { }
+
+    void operator()() {
+        double x = _guess;
+        for (int i = 0; i < _iterations; ++i) {
+            double fX = (x * x) - _num;
+            x = x - (fX / (2 * x));
+        }
+        std::printf("The root of %f is %f.\n", _num, x);
+    }
+
+private:
+    double _num, _guess;
+    int _iterations;
+};
 
 /****************** Global Functions **********************/
 /* Simple test func. */
-void workerFunc1() {
-    boost::posix_time::seconds workTime(3);
-    
+void workerFunc1(string &msg) {
+    boost::posix_time::seconds workTime(1);
+
     cout << "Worker: Running." << endl;
+    cout << msg << endl;
     boost::this_thread::sleep(workTime);
     cout << "Worker: Finished." << endl;
 }
 
+double computeRoot(int num, double guess, int iters) {
+    double x = guess;
+    for (int i = 0; i < iters; ++i) {
+        double fX = (x * x) - num;
+        x = x - (fX / (2 * x));
+    }
+
+    return x;
+}
+
 TEST(BoostThreads, SimpleExecute) {
     cout << endl << "Main: Startup." << endl;
-    
-    boost::thread w1(workerFunc1);
+
+    boost::thread w1(workerFunc1, string("Hello there."));
     cout << "Main: Waiting." << endl;
     w1.join();
     cout << "Main: Finished." << endl;
 }
 
+TEST(BoostThreads, ComputeRoot) {
+    cout << endl << "Main: Startup." << endl;
+
+    Worker work1(612, 10, 10);
+    boost::thread workThread(work1);
+    cout << "Main: Waiting." << endl;
+    workThread.join();
+    cout << "Main: Finished." << endl;
+}
 /* Notes:
  * Force call to use another version of virtual function: baseP->Item_base::net_price(42);
  *

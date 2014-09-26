@@ -8,7 +8,8 @@ SET(BOOST_ROOT  "${CMAKE_SOURCE_DIR}/libs")
 SET(GTEST_ROOT  "${BOOST_ROOT}")
 SET(B_LIB    "blib")
 
-FIND_PACKAGE(Boost 1.56.0 REQUIRED chrono date_time filesystem system thread)
+FIND_PACKAGE(Boost 1.56.0 REQUIRED chrono date_time filesystem
+    program_options system thread)
 FIND_PACKAGE(GTest 1.7 REQUIRED)
 FIND_PACKAGE(Threads REQUIRED)
 
@@ -31,7 +32,7 @@ ADD_LIBRARY(
 
 ADD_EXECUTABLE(BoostEx ${B_MAIN})
 ADD_EXECUTABLE(BoostExTest ${TEST_SOURCES})
-ADD_EXECUTABLE(ProgramOpts1 ${PO_1_SOURCES})
+ADD_EXECUTABLE(ProgOpts1 ${PO_1_SOURCES})
 
 TARGET_LINK_LIBRARIES(${B_LIB}
     ${Boost_LIBRARIES}
@@ -44,7 +45,7 @@ TARGET_LINK_LIBRARIES(BoostExTest
     ${B_LIB}
     ${GTEST_BOTH_LIBRARIES}
 )
-TARGET_LINK_LIBRARIES(ProgramOpts1
+TARGET_LINK_LIBRARIES(ProgOpts1
     ${Boost_LIBRARIES}
     ${CMAKE_THREAD_LIBS_INIT}
     ${GTEST_BOTH_LIBRARIES}

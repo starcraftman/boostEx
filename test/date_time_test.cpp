@@ -97,16 +97,16 @@ TEST(BoostDateGregorian, Arithmetic) {
 }
 
 TEST(BoostDateGregorian, DaysIterator) {
-    std::vector<d::date> vExpect = {d::date(2002, greg::Feb, 1),
+    std::vector<greg::date> vExpect = {greg::date(2002, greg::Feb, 1),
 	greg::date(2002, greg::Feb, 2), greg::date(2002, greg::Feb, 3),
 	greg::date(2002, greg::Feb, 4), greg::date(2002, greg::Feb, 5),
     };
     greg::date dateStart(2002, greg::Feb, 1), dateEnd(2002, greg::Feb, 6);
 
     /* Iterate the days from a start to end */
-    std::vector<d::date>::const_iterator itE = vExpect.begin();
-    for(d::day_iterator itA(dateStart); itA != dateEnd; ++itA, ++itE) {
-	datesEqual<d::date>(*itE, *itA);
+    std::vector<greg::date>::const_iterator itE = vExpect.begin();
+    for(greg::day_iterator itA(dateStart); itA != dateEnd; ++itA, ++itE) {
+	datesEqual<greg::date>(*itE, *itA);
     }
 }
 

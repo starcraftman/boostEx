@@ -27,7 +27,7 @@
 //#include <algorithm>
 //#include <numeric>
 //#include <functional> // Functional objects.
-//#include <iterator> // Contains back_inserter function and like.
+#include <iterator> // Contains back_inserter function and like.
 
 /* C Headers */
 //#include <cstdlib>
@@ -41,7 +41,7 @@
 /* Project Headers */
 #include <boost/date_time.hpp>
 #include <boost/foreach.hpp>
-#include <boost/tokenizer.hpp>
+#include <boost/program_options.hpp>
 #include <gtest/gtest.h>
 
 /******************* Constants/Macros *********************/
@@ -52,6 +52,7 @@ using std::cin;
 using std::cout;
 using std::endl;
 using std::string;
+namespace po = boost::program_options;
 
 /******************* Type Definitions *********************/
 /* For enums: Try to namesapce the common elements.
@@ -70,6 +71,38 @@ using std::string;
 
 
 /****************** Global Functions **********************/
+int main(int argc, char *argv[]) {
+    try {
+        po::options_description desc("Allowed options");
+        desc.add_options()
+            ("help", "produce help message")
+            ("compression", po::value<int>(), "set compression level")
+        ;
+
+        po::variables_map vm;
+        po::store(po::parse_command_line(argc, argv, desc), vm);
+        po::notify(vm);
+
+        if (vm.count("help")) {
+            cout << desc << endl;
+            return 1;
+        }
+        if (vm.count("compression")) {
+            cout << "Compression level was set to: " << vm["compression"].as<int>() << endl;
+        } else {
+            cout << "Compression level was not set." << endl;
+        }
+    }
+    catch(std::exception& e) {
+        std::cerr << "error: " << e.what() << endl;
+        return 1;
+    }
+    catch(...) {
+        std::cerr << "Exception of unknown type!" << endl;
+    }
+
+    return 0;
+}
 
 
 /* Notes:

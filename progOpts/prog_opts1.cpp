@@ -65,58 +65,12 @@ using std::string;
  *	int index;
  * } name_t;
  */
-typedef std::vector<string> vs_t;
 
 /****************** Class Definitions *********************/
 
 
 /****************** Global Functions **********************/
-void assertEquality(vs_t expect, vs_t actual) {
-    vs_t::const_iterator itrE = expect.begin();
-    for (vs_t::const_iterator itrA = actual.begin(); itrA != actual.end(); ++itrA, ++itrE) {
-        ASSERT_STREQ(itrE->c_str(), itrA->c_str());
-    }
-}
 
-TEST(BoostTokenizer, SimpleTokenizer) {
-    vs_t tokensActual, tokensExpect = {"This", "is", "a", "test" };
-    string s = "This is,  a test";
-
-    boost::tokenizer<> tokens(s);
-    for (auto tok : tokens) {
-        tokensActual.push_back(tok);
-    }
-
-    assertEquality(tokensExpect, tokensActual);
-}
-
-TEST(BoostTokenizer, CSVTokenizer) {
-    vs_t tokensActual, tokensExpect = {"Field 1",
-        "putting quotes around fields, allows commas", "Field 3"};
-    string s = "Field 1,\"putting quotes around fields, allows commas\",Field 3";
-
-    boost::tokenizer<boost::escaped_list_separator<char> > tokens(s);
-    for (auto tok : tokens) {
-        tokensActual.push_back(tok);
-    }
-
-    assertEquality(tokensExpect, tokensActual);
-}
-
-TEST(BoostTokenizer, OffsetTokenizer) {
-    vs_t tokensActual, tokensExpect = {"12", "25", "2001"};
-    string s = "12252001";
-    int offsets[] = {2, 2, 4};
-
-    boost::offset_separator offSeps(offsets, offsets+3);
-    boost::tokenizer<boost::offset_separator> tokens(s, offSeps);
-
-    for (auto tok : tokens) {
-        tokensActual.push_back(tok);
-    }
-
-    assertEquality(tokensExpect, tokensActual);
-}
 
 /* Notes:
  * Force call to use another version of virtual function: baseP->Item_base::net_price(42);

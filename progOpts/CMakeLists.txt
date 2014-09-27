@@ -9,3 +9,9 @@ SET(PO_2_SOURCES
     "${CMAKE_CURRENT_SOURCE_DIR}/prog_opts2.cpp"
     PARENT_SCOPE
 )
+
+SET(PO_3_SOURCES
+    ${PO_3_SOURCES}
+    "${CMAKE_CURRENT_SOURCE_DIR}/prog_opts3.cpp"
+    PARENT_SCOPE
+)

@@ -6,6 +6,7 @@ SET(TEST_SOURCES
     "${CMAKE_CURRENT_SOURCE_DIR}/date_time_test.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/filesystem_test.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/foreach_test.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/prop_tree_test.cpp"
     #"${CMAKE_CURRENT_SOURCE_DIR}/threads_test.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/tokenizer_test.cpp"
     PARENT_SCOPE

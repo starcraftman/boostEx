@@ -71,16 +71,36 @@ namespace po = boost::program_options;
 
 
 /****************** Global Functions **********************/
+template<class T>
+std::ostream & operator<<(std::ostream & os, const std::vector<T> & v) {
+    std::copy(v.begin(), v.end(), std::ostream_iterator<T>(os, " "));
+    return os;
+}
+
 int main(int argc, char *argv[]) {
     try {
+        int opt;
+        int portnum;
         po::options_description desc("Allowed options");
         desc.add_options()
             ("help", "produce help message")
             ("compression", po::value<int>(), "set compression level")
+            ("optimization level", po::value<int>(&opt)->default_value(10),
+                 "optimization level")
+            ("verbose,v", po::value<int>()->implicit_value(1),
+                "enable verbosity (optionally specify level)")
+            ("listen,l", po::value<int>(&portnum)->implicit_value(1001)
+                ->default_value(0, "no"), "listen on a port")
+            ("include-path,I", po::value< std::vector<string> >(), "include path")
+            ("input-file", po::value< std::vector<string> >(), "input file")
         ;
 
+        po::positional_options_description p;
+        p.add("input-file", -1);
+
         po::variables_map vm;
-        po::store(po::parse_command_line(argc, argv, desc), vm);
+        po::store(po::command_line_parser(argc, argv).
+                  options(desc).positional(p).run(), vm);
         po::notify(vm);
 
         if (vm.count("help")) {
@@ -92,6 +112,20 @@ int main(int argc, char *argv[]) {
         } else {
             cout << "Compression level was not set." << endl;
         }
+        if (vm.count("include-path")) {
+            cout << "Include paths are: "
+                << vm["include-path"].as< std::vector<string> >() << endl;
+        }
+        if (vm.count("input-file")) {
+            cout << "Input files are: "
+                << vm["input-file"].as< std::vector<string> >() << endl;
+        }
+        if (vm.count("verbose")) {
+            cout << "Verbosity enabled. Level is " << vm["verbose"].as<int>() << endl;
+        }
+
+        cout << "Optimization level is " << opt << endl;
+        cout << "Listen port is " << portnum << endl;
     }
     catch(std::exception& e) {
         std::cerr << "error: " << e.what() << endl;

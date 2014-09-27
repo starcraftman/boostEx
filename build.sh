@@ -18,7 +18,7 @@ build() {
 
   pushd "$BDIR"
   if [ ! -f "$BDIR/CMakeCache.txt" ]; then
-    cmake ..
+    cmake $@ ..
   fi
   make
   popd
@@ -38,6 +38,12 @@ for arg; do
     "test")
       build
       $BDIR/BoostExTest
+      ;;
+    "progOpts")
+      build "-DProgOpts=ON"
+      echo "Run programs separately, see --help."
+      echo "The programs available are: "
+      echo ./gen/ProgOpts*
       ;;
     *) # Default is to run
       build

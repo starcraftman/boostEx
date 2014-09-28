@@ -1,6 +1,6 @@
 SET(PY_LIB_SOURCES
     ${PY_LIB_SOURCES}
-    "${CMAKE_CURRENT_SOURCE_DIR}/simple.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/python.cpp"
     PARENT_SCOPE
 )
 

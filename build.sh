@@ -52,7 +52,7 @@ for arg; do
     "python")
       build "-DPython=ON"
       echo "Executing Python code."
-      ./python/simple.py
+      ./python/run.py
       ;;
     *) # Default is to run
       echo "Invalid command, see the help."

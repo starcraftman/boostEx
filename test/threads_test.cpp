@@ -88,6 +88,35 @@ private:
     int _iterations;
 };
 
+class WorkerObj {
+public:
+    WorkerObj(double num, double guess, int iterations) :
+        _num(num), _guess(guess), _iterations(iterations) { }
+
+    void computeRoot() {
+        cout << "Worker Started." << endl;
+        double x = _guess;
+        for (int i = 0; i < _iterations; ++i) {
+            double fX = (x * x) - _num;
+            x = x - (fX / (2 * x));
+        }
+        std::printf("The root of %f is %f.\n", _num, x);
+    }
+
+    void start() {
+        _thread = boost::thread(&WorkerObj::computeRoot, this);
+    }
+
+    void join() {
+        _thread.join();
+    }
+
+private:
+    double _num, _guess;
+    int _iterations;
+    boost::thread  _thread;
+};
+
 /****************** Global Functions **********************/
 /* Simple test func. */
 void workerFunc1(string &msg) {
@@ -121,10 +150,20 @@ TEST(BoostThreads, SimpleExecute) {
 TEST(BoostThreads, ComputeRoot) {
     cout << endl << "Main: Startup." << endl;
 
-    Worker work1(612, 10, 10);
-    boost::thread workThread(work1);
+    Worker worker(612, 10, 10);
+    boost::thread workThread(worker);
     cout << "Main: Waiting." << endl;
     workThread.join();
+    cout << "Main: Finished." << endl;
+}
+
+TEST(BoostThreads, ObjectThreadWorker) {
+    cout << endl << "Main: Startup." << endl;
+
+    WorkerObj worker(900, 15, 10);
+    worker.start();
+    cout << "Main: Waiting." << endl;
+    worker.join();
     cout << "Main: Finished." << endl;
 }
 /* Notes:

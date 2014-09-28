@@ -74,6 +74,22 @@ private:
     string msg;
 };
 
+class Var {
+public:
+    Var(std::string name) : name(name), val(0) {}
+    string const name;
+    float val;
+};
+
+class ClassProp {
+public:
+    ClassProp() : val(0) {};
+    float get() const { return val; }
+    void setV(float value) { val = value; }
+private:
+    float val;
+};
+
 /****************** Global Functions **********************/
 char const * greet() {
     return "hello, world";
@@ -85,6 +101,16 @@ BOOST_PYTHON_MODULE(libBoost) {
     boost::python::class_<World>("World", boost::python::init<string>())
         .def("greet", &World::greet)
         .def("set", &World::set)
+    ;
+
+    boost::python::class_<Var>("Var", boost::python::init<string>()) 
+        .def_readonly("name", &Var::name)
+        .def_readwrite("value", &Var::val)
+    ;
+
+    boost::python::class_<ClassProp>("ClassProp")
+        .add_property("rovalue", &ClassProp::get)
+        .add_property("value", &ClassProp::get, &ClassProp::setV)
     ;
 }
 

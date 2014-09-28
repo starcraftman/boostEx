@@ -31,13 +31,13 @@ for arg; do
       exit
       ;;
     "clean")
-      rm -rf "$BDIR"
+      rm -rf "$BDIR" "python/libBoost.so"
       mkdir -p "$BDIR"
       touch "$BDIR/DUMMY"
       ;;
     "test")
-      build
-      $BDIR/BoostExTest
+      build "-DTest=ON"
+      $BDIR/BoostTest
       ;;
     "progOpts")
       build "-DProgOpts=ON"
@@ -45,9 +45,13 @@ for arg; do
       echo "The programs available are: "
       echo ./gen/ProgOpts*
       ;;
+    "python")
+      build "-DPython=ON"
+      echo "Executing Python code."
+      ./python/simple.py
+      ;;
     *) # Default is to run
-      build
-      $BDIR/BoostEx
+      echo "Invalid command, see the help."
       ;;
   esac
 done

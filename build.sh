@@ -5,10 +5,14 @@ ROOT=$(readlink -f $(dirname $0))
 BDIR=$ROOT/gen
 
 usage() {
-  echo "Builds the project. Takes optional args:
-  clean: Remove build dir.
-  run  : Execute main program.
-  test : Run tests."
+  echo "USAGE: ./$(basename $0) OPT1 OPT2 ...
+    clean    : Remove build dir.
+    propOpts : Build program_options files.
+    python   : Build boost::python lib.
+    test     : Run tests.
+
+  NB: Be sure to 'clean' before switching between projects.
+  i.e. ./build.sh clean python"
 }
 
 build() {

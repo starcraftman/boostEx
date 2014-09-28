@@ -65,7 +65,14 @@ using std::string;
  */
 
 /****************** Class Definitions *********************/
-
+class World {
+public:
+    World(string msg) : msg(msg) {}
+    inline void set(string msg) { this->msg = msg; }
+    inline string greet() { return msg; }
+private:
+    string msg;
+};
 
 /****************** Global Functions **********************/
 char const * greet() {
@@ -74,6 +81,11 @@ char const * greet() {
 
 BOOST_PYTHON_MODULE(libBoost) {
     boost::python::def("greet", greet);
+
+    boost::python::class_<World>("World", boost::python::init<string>())
+        .def("greet", &World::greet)
+        .def("set", &World::set)
+    ;
 }
 
 /* Notes:

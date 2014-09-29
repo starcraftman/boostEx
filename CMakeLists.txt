@@ -10,7 +10,7 @@ SET(GTEST_ROOT  "${BOOST_ROOT}")
 SET(BOOST_EXE "BoostTest")
 SET(PY_LIB   "Boost")
 
-FIND_PACKAGE(Boost 1.56.0 REQUIRED chrono date_time filesystem log
+FIND_PACKAGE(Boost 1.56.0 REQUIRED chrono date_time filesystem log log_setup
     program_options python system thread)
 FIND_PACKAGE(GTest 1.7 REQUIRED)
 FIND_PACKAGE(Threads REQUIRED)

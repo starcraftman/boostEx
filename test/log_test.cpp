@@ -86,35 +86,24 @@ protected:
 
     virtual void TearDown() {
         boost::log::core::get()->reset_filter();
-        if (boost::filesystem::exists(SAMPLE_LOG)) {
-            std::remove(SAMPLE_LOG);
-        }
     }
-
 private:
 };
 
 
 
 /****************** Global Functions **********************/
+/* Trivial logs to cout by deault */
 TEST_F(BoostLogging, Trivial) {
-    BOOST_LOG_TRIVIAL(trace) << "A trace severity message.";
-    BOOST_LOG_TRIVIAL(debug) << "A debug severity message";
-    BOOST_LOG_TRIVIAL(info) << "An informational severity message";
-    BOOST_LOG_TRIVIAL(warning) << "A warning severity message";
-    BOOST_LOG_TRIVIAL(error) << "An error severity message";
     BOOST_LOG_TRIVIAL(fatal) << "A fatal severity message";
 }
 
 TEST_F(BoostLogging, LoggingFilters) {
+    /* Only print stuff above debug */
     boost::log::core::get()->set_filter(
             bl::trivial::severity >= bl::trivial::info);
 
-    BOOST_LOG_TRIVIAL(trace) << "A trace severity message.";
     BOOST_LOG_TRIVIAL(debug) << "A debug severity message";
-    BOOST_LOG_TRIVIAL(info) << "An informational severity message";
-    BOOST_LOG_TRIVIAL(warning) << "A warning severity message";
-    BOOST_LOG_TRIVIAL(error) << "An error severity message";
     BOOST_LOG_TRIVIAL(fatal) << "A fatal severity message";
 }
 
@@ -127,11 +116,24 @@ TEST_F(BoostLogging, FileLog) {
     bl::add_common_attributes();
     src::severity_logger<bl::trivial::severity_level> lg;
 
-    BOOST_LOG_SEV(lg, bl::trivial::trace) << "A trace severity message";
-    BOOST_LOG_SEV(lg, bl::trivial::debug) << "A debug severity message";
-    BOOST_LOG_SEV(lg, bl::trivial::info) << "An informational severity message";
-    BOOST_LOG_SEV(lg, bl::trivial::warning) << "A warning severity message";
-    BOOST_LOG_SEV(lg, bl::trivial::error) << "An error severity message";
+    BOOST_LOG_SEV(lg, bl::trivial::fatal) << "A fatal severity message";
+}
+
+TEST_F(BoostLogging, FileLogKeywords) {
+    bl::add_file_log(
+            bl::keywords::file_name = "sample_%N.log",
+            bl::keywords::rotation_size = 10 * 1024 * 1024,
+            bl::keywords::time_based_rotation = sinks::file::rotation_at_time_point(0, 0, 0),
+            bl::keywords::format = "[%TimeStamp%]: %Message%"
+    );
+
+    bl::core::get()->set_filter(
+        bl::trivial::severity > bl::trivial::info
+    );
+
+    bl::add_common_attributes();
+    src::severity_logger<bl::trivial::severity_level> lg;
+
     BOOST_LOG_SEV(lg, bl::trivial::fatal) << "A fatal severity message";
 }
 

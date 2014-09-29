@@ -69,7 +69,7 @@ using std::string;
 
 /****************** Global Functions **********************/
 
-TEST(BoostEx, BoostForeachSimple) {
+TEST(BoostForeach, SimpleLoop) {
     string hello("Hello");
     std::stringstream ss;
 

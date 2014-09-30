@@ -46,7 +46,7 @@
 #include <gtest/gtest.h>
 
 /******************* Constants/Macros *********************/
-#define XML_DEBUG_ORIG "examples/property_tree/debug_settings.xml"
+#define XML_DEBUG_ORIG "res/property_tree/debug_settings.xml"
 #define XML_DEBUG_NEW "debug_settings.xml"
 #define JSON_DEBUG_NEW "debug_settings.json"
 

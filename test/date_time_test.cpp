@@ -44,7 +44,7 @@
 #include <gtest/gtest.h>
 
 /******************* Constants/Macros *********************/
-
+#define TIME_DB_FILE "res/date_time/date_time_zonespec.csv"
 
 /**************** Namespace Declarations ******************/
 using std::cin;
@@ -149,7 +149,7 @@ TEST(BoostDatePosixTime, InputCreate) {
 
 TEST(BoostDateTimeZone, SimpleConversion) {
     lTime::tz_database tzDb;
-    tzDb.load_from_file("test/res/date_time_zonespec.csv");
+    tzDb.load_from_file(TIME_DB_FILE);
     lTime::time_zone_ptr nycTz = tzDb.time_zone_from_region("America/New_York");
     lTime::time_zone_ptr phxTz(new lTime::posix_time_zone("MST-07:00:00"));
 

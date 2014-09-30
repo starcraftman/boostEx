@@ -5,8 +5,8 @@
 /********************* Header Files ***********************/
 /* C++ Headers */
 #include <iostream> /* Input/output objects. */
-//#include <fstream> /* File operations. */
-#include <sstream> /* String stream. */
+#include <fstream> /* File operations. */
+//#include <sstream> [> String stream. <]
 #include <string> /* C++ String class. */
 //#include <new> /* Defines bad_malloc exception, new functions. */
 //#include <typeinfo> /* Casting header. */
@@ -44,10 +44,13 @@
 #include <boost/log/expressions.hpp>
 #include <boost/log/trivial.hpp>
 #include <boost/log/sinks/text_file_backend.hpp>
+#include <boost/log/sources/global_logger_storage.hpp>
+#include <boost/log/sources/logger.hpp>
 #include <boost/log/sources/record_ostream.hpp>
 #include <boost/log/sources/severity_logger.hpp>
 #include <boost/log/utility/setup/file.hpp>
 #include <boost/log/utility/setup/common_attributes.hpp>
+#include <boost/move/utility.hpp>
 #include <gtest/gtest.h>
 
 /******************* Constants/Macros *********************/
@@ -58,7 +61,7 @@ using std::cin;
 using std::cout;
 using std::endl;
 using std::string;
-namespace bl = boost::log;
+namespace blog = boost::log;
 namespace sinks = boost::log::sinks;
 namespace src = boost::log::sources;
 namespace expr = boost::log::expressions;
@@ -78,6 +81,8 @@ namespace keywords = boost::log::keywords;
  * } name_t;
  */
 
+BOOST_LOG_INLINE_GLOBAL_LOGGER_DEFAULT(myLogger, src::logger_mt)
+
 /****************** Class Definitions *********************/
 class BoostLogging : public ::testing::Test {
 protected:
@@ -86,13 +91,34 @@ protected:
 
     virtual void TearDown() {
         boost::log::core::get()->reset_filter();
+        //if (boost::filesystem::exists(SAMPLE_LOG)) {
+            //std::remove(SAMPLE_LOG);
+        //}
+        //if (boost::filesystem::exists("sample_0.log")) {
+            //std::remove("sample_0.log");
+        //}
     }
 private:
 };
 
-
-
 /****************** Global Functions **********************/
+void checkLog(const string & file, const std::vector<string> & expected) {
+    string line;
+    std::ifstream logIn(file);
+    std::vector<string> actual;
+
+    while (std::getline(logIn, line)) {
+        actual.push_back(line);
+    }
+
+    std::vector<string>::const_iterator itrE = expected.begin();
+    ASSERT_EQ(expected.size(), actual.size());
+    for (std::vector<string>::const_iterator itrA = actual.begin();
+            itrA != actual.end(); ++itrA, ++itrE) {
+        ASSERT_STREQ(itrE->c_str(), itrA->c_str());
+    }
+}
+
 /* Trivial logs to cout by deault */
 TEST_F(BoostLogging, Trivial) {
     BOOST_LOG_TRIVIAL(fatal) << "A fatal severity message";
@@ -101,40 +127,62 @@ TEST_F(BoostLogging, Trivial) {
 TEST_F(BoostLogging, LoggingFilters) {
     /* Only print stuff above debug */
     boost::log::core::get()->set_filter(
-            bl::trivial::severity >= bl::trivial::info);
+            blog::trivial::severity >= blog::trivial::info);
 
     BOOST_LOG_TRIVIAL(debug) << "A debug severity message";
     BOOST_LOG_TRIVIAL(fatal) << "A fatal severity message";
 }
 
 TEST_F(BoostLogging, FileLog) {
-    bl::add_file_log("sample.log");
-    bl::core::get()->set_filter(
-        bl::trivial::severity > bl::trivial::info
+    blog::add_file_log("sample.log");
+    blog::core::get()->set_filter(
+        blog::trivial::severity > blog::trivial::info
     );
 
-    bl::add_common_attributes();
-    src::severity_logger<bl::trivial::severity_level> lg;
+    blog::add_common_attributes();
+    src::severity_logger<blog::trivial::severity_level> lg;
 
-    BOOST_LOG_SEV(lg, bl::trivial::fatal) << "A fatal severity message";
+    BOOST_LOG_SEV(lg, blog::trivial::fatal) << "A fatal severity message";
 }
 
 TEST_F(BoostLogging, FileLogKeywords) {
-    bl::add_file_log(
-            bl::keywords::file_name = "sample_%N.log",
-            bl::keywords::rotation_size = 10 * 1024 * 1024,
-            bl::keywords::time_based_rotation = sinks::file::rotation_at_time_point(0, 0, 0),
-            bl::keywords::format = "[%TimeStamp%]: %Message%"
+    blog::add_file_log(
+            blog::keywords::file_name = "sample_%N.log",
+            blog::keywords::rotation_size = 10 * 1024 * 1024,
+            blog::keywords::time_based_rotation = sinks::file::rotation_at_time_point(0, 0, 0),
+            blog::keywords::format = "[%TimeStamp%]: %Message%"
     );
 
-    bl::core::get()->set_filter(
-        bl::trivial::severity > bl::trivial::info
+    blog::core::get()->set_filter(
+        blog::trivial::severity > blog::trivial::info
     );
 
-    bl::add_common_attributes();
-    src::severity_logger<bl::trivial::severity_level> lg;
+    blog::add_common_attributes();
+    src::severity_logger<blog::trivial::severity_level> lg;
 
-    BOOST_LOG_SEV(lg, bl::trivial::fatal) << "A fatal severity message";
+    BOOST_LOG_SEV(lg, blog::trivial::fatal) << "A fatal severity message";
+}
+
+TEST_F(BoostLogging, LoggerObject) {
+    blog::add_file_log(
+            blog::keywords::file_name = SAMPLE_LOG,
+            blog::keywords::rotation_size = 10 * 1024 * 1024,
+            blog::keywords::time_based_rotation = sinks::file::rotation_at_time_point(0, 0, 0),
+            blog::keywords::format = "[%TimeStamp%]: %Message%"
+    );
+    blog::add_common_attributes();
+
+    src::logger lg;
+    blog::record rec = lg.open_record();
+    if (rec) {
+        blog::record_ostream stream(rec);
+        stream << "Hello, world." << endl;
+        stream.flush();
+        lg.push_record(boost::move(rec));
+    }
+
+    //src::logger_mt lg2 = my_logger::get();
+    //BOOST_LOG(lg2) << "Greetings from global logger.";
 }
 
 /* Notes:

@@ -40,17 +40,17 @@ for arg; do
       touch "$BDIR/DUMMY"
       ;;
     "test")
-      build "-DTest=ON"
+      build -DTest=ON
       $BDIR/BoostTest
       ;;
     "progOpts")
-      build "-DProgOpts=ON"
+      build -DProgOpts=ON
       echo "Run programs separately, see --help."
       echo "The programs available are: "
       echo ./gen/ProgOpts*
       ;;
     "python")
-      build "-DPython=ON"
+      build -DPython=ON -DStaticBoost=OFF
       echo "Executing Python code."
       ./python/run.py
       ;;

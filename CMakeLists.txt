@@ -1,10 +1,18 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 PROJECT(BoostEx C CXX)
 
-# Variables
+OPTION(StaticBoost "StaticBoost" ON)
+OPTION(ProgOpts "ProgOpts" OFF)
+OPTION(Python "Python" OFF)
+OPTION(Test "Test" OFF)
+
+IF(StaticBoost)
+    SET(Boost_USE_STATIC_LIBS ON)
+ELSE(StaticBoost)
+    SET(Boost_USE_STATIC_LIBS OFF)
+ENDIF(StaticBoost)
 SET(DEBUG_FLAGS "-ggdb -Wall -Wextra -Winline -pedantic")
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -D_REENTRANT ${DEBUG_FLAGS}")
-SET(Boost_USE_STATIC_LIBS ON)
 SET(BOOST_ROOT  "${CMAKE_SOURCE_DIR}/libs")
 SET(GTEST_ROOT  "${BOOST_ROOT}")
 SET(BOOST_EXE "BoostTest")
@@ -25,10 +33,6 @@ INCLUDE_DIRECTORIES(
 ADD_SUBDIRECTORY(test)
 ADD_SUBDIRECTORY(progOpts)
 ADD_SUBDIRECTORY(python)
-
-OPTION(ProgOpts "ProgOpts" OFF)
-OPTION(Python "Python" OFF)
-OPTION(Test "Test" OFF)
 
 IF(Test)
     ADD_EXECUTABLE(${BOOST_EXE} ${TEST_SOURCES})

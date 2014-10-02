@@ -36,19 +36,16 @@
 //#include <cctype>
 //#include <cstring>
 //#include <cstdio>
-#include <climits>
+//#include <climits>
 //#include <cassert>
 
 /* Project Headers */
 #include <boost/date_time.hpp>
-#include <boost/foreach.hpp>
 #include <boost/thread.hpp>
 #include <gtest/gtest.h>
 
 /******************* Constants/Macros *********************/
 #define MAX_SLEEP_TIME_ms 500
-std::default_random_engine gGenerator;
-std::uniform_int_distribution<long> gDistribution(0, LONG_MAX);
 
 /**************** Namespace Declarations ******************/
 using std::cin;
@@ -57,28 +54,49 @@ using std::endl;
 using std::string;
 
 /******************* Type Definitions *********************/
-typedef std::vector<long> queue_t;
+typedef std::vector<int> queue_t;
+typedef std::vector<std::string> vecStr_t;
 
 /****************** Class Definitions *********************/
-long randLong(long max = 0) {
-    long val = gDistribution(gGenerator);
-    if (max) {
-        val = val % max;
-    }
+int randInt() {
+    static std::default_random_engine gGenerator;
+    static std::uniform_int_distribution<int> gDistribution(0, 32*1024);
 
-    return val;
+    return gDistribution(gGenerator);
 }
 
-class Worker {
+/* Simple logger wrapper, format: [date] tag: msg\n */
+void log(const char* tag, const char* msg) {
+    std::stringstream ss;
+    ss << "[" << boost::posix_time::second_clock::local_time() << "] "
+        << tag << ": " << msg << endl;
+    cout << ss.str();
+}
+
+void log(std::string tag, std::string msg) {
+    log(tag.c_str(), msg.c_str());
+}
+
+template <typename T>
+void log(std::string tag, T list) {
+    std::stringstream ss;
+    for (auto word : list) {
+        ss << word << " ";
+    }
+
+    log(tag.c_str(), ss.str().c_str());
+}
+
+class Thread {
 public:
-    Worker() : threadRunning(false) { };
-    virtual ~Worker() {};
+    Thread() : threadRunning(false) { };
+    virtual ~Thread() {};
 
     virtual void execute() = 0;
     virtual void start() = 0;
-    void stop() { threadRunning = false; }
-    void join() { thread.join(); }
-    bool isRunning() { return threadRunning; }
+    inline void stop() { threadRunning = false; }
+    inline void join() { thread.join(); }
+    inline bool isRunning() { return threadRunning; }
 
 protected:
     bool threadRunning;
@@ -87,10 +105,10 @@ protected:
     static queue_t work;
     static boost::mutex workMutex;
 };
-boost::mutex Worker::workMutex;
-queue_t Worker::work;
+boost::mutex Thread::workMutex;
+queue_t Thread::work;
 
-class ProducerTryLock : public Worker {
+class ProducerTryLock : public Thread {
 public:
     virtual void start() {
         threadRunning = true;
@@ -99,26 +117,28 @@ public:
     virtual void execute() {
         while (threadRunning) {
             if (workMutex.try_lock()) {
-                long val = randLong();
+                int val = randInt();
                 work.push_back(val);
 
-                printf("^^^ %ld\n", val);
+                std::stringstream ss;
+                ss << val;
+                log("Producer", ss.str().c_str());
 
                 boost::posix_time::milliseconds delay(50);
                 boost::this_thread::sleep(delay);
                 workMutex.unlock();
             } else {
-                printf("^== \n");
+                log("Producer", "---");
             }
 
             // Slow things down a little
-            boost::posix_time::milliseconds delayTime(randLong() % MAX_SLEEP_TIME_ms);
+            boost::posix_time::milliseconds delayTime(randInt() % MAX_SLEEP_TIME_ms);
             boost::this_thread::sleep(delayTime);
         }
     }
 };
 
-class ConsumerTryLock : public Worker {
+class ConsumerTryLock : public Thread {
 public:
     virtual void start() {
         threadRunning = true;
@@ -128,21 +148,23 @@ public:
         while (threadRunning) {
             if (workMutex.try_lock()) {
                 if (work.size()) {
-                    long val = work.back();
+                    int val = work.back();
                     work.pop_back();
 
-                    printf("vvv %ld\n", val);
+                    std::stringstream ss;
+                    ss << val;
+                    log("Consumer", ss.str().c_str());
                 }
 
                 boost::posix_time::milliseconds delay(50);
                 boost::this_thread::sleep(delay);
                 workMutex.unlock();
             } else {
-                printf("v==\n");
+                log("Consumer", "---");
             }
 
             // Slow things down a little
-            boost::posix_time::milliseconds delayTime(randLong() % MAX_SLEEP_TIME_ms);
+            boost::posix_time::milliseconds delayTime(randInt() % MAX_SLEEP_TIME_ms);
             boost::this_thread::sleep(delayTime);
         }
     }
@@ -150,7 +172,6 @@ public:
 
 /****************** Global Functions **********************/
 TEST(BoostThread, AcquireMutex) {
-    boost::mutex m;
     ProducerTryLock t1;
     ConsumerTryLock t2;
     t1.start();

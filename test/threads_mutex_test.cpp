@@ -31,13 +31,14 @@
 //#include <iterator> // Contains back_inserter function and like.
 
 /* C Headers */
-//#include <cstdlib>
+#include <cstdlib>
 //#include <cstddef>
 //#include <cctype>
 //#include <cstring>
 //#include <cstdio>
 //#include <climits>
 //#include <cassert>
+#include <ctime>
 
 /* Project Headers */
 #include <boost/date_time.hpp>
@@ -69,8 +70,7 @@ int randInt() {
 void log(const char* tag, const char* msg) {
     std::stringstream ss;
     ss << "[" << boost::posix_time::second_clock::local_time() << "] "
-        << tag << ": " << msg << endl;
-    cout << ss.str();
+        << tag << ": " << msg << endl; cout << ss.str();
 }
 
 void log(std::string tag, std::string msg) {
@@ -172,18 +172,23 @@ public:
 
 /****************** Global Functions **********************/
 TEST(BoostThread, AcquireMutex) {
-    ProducerTryLock t1;
-    ConsumerTryLock t2;
-    t1.start();
-    t2.start();
+    std::srand(std::time(NULL));
+    ProducerTryLock producer;
+    ConsumerTryLock consumer;
+    producer.start();
+    consumer.start();
 
     boost::posix_time::milliseconds workTime(2000);
     boost::this_thread::sleep(workTime);
 
-    t1.stop();
-    t2.stop();
-    t1.join();
-    t2.join();
+    log("AcquireMutex", "Shutting down Producer");
+    producer.stop();
+    producer.join();
+
+    boost::this_thread::sleep(workTime);
+    log("AcquireMutex", "Shutting down Consumer");
+    consumer.stop();
+    consumer.join();
 }
 
 /* Notes:

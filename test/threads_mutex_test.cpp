@@ -27,7 +27,7 @@
 //#include <utility> // Has pair for map.
 //#include <algorithm>
 //#include <numeric>
-//#include <functional> // Functional objects.
+#include <functional> // Functional objects.
 //#include <iterator> // Contains back_inserter function and like.
 
 /* C Headers */
@@ -67,30 +67,30 @@ int randInt() {
 }
 
 /* Simple logger wrapper, format: [date] tag: msg\n */
-void log(const char* tag, const char* msg) {
+void myLog(const char* const tag, const char* const msg) {
     std::stringstream ss;
     ss << "[" << boost::posix_time::second_clock::local_time() << "] "
         << tag << ": " << msg << endl; cout << ss.str();
 }
 
-void log(std::string tag, std::string msg) {
-    log(tag.c_str(), msg.c_str());
+void log(const std::string tag, const std::string msg) {
+    myLog(tag.c_str(), msg.c_str());
 }
 
 template <typename T>
-void log(std::string tag, T list) {
+void log(const std::string tag, const T list) {
     std::stringstream ss;
     for (auto word : list) {
         ss << word << " ";
     }
 
-    log(tag.c_str(), ss.str().c_str());
+    myLog(tag.c_str(), ss.str().c_str());
 }
 
 class Thread {
 public:
-    Thread() : threadRunning(false) { };
-    virtual ~Thread() {};
+    Thread() : threadRunning(false) { }
+    virtual ~Thread() {}
 
     virtual void execute() = 0;
     virtual void start() = 0;
@@ -105,8 +105,8 @@ protected:
     static queue_t work;
     static boost::mutex workMutex;
 };
-boost::mutex Thread::workMutex;
 queue_t Thread::work;
+boost::mutex Thread::workMutex;
 
 class ProducerTryLock : public Thread {
 public:
@@ -122,13 +122,13 @@ public:
 
                 std::stringstream ss;
                 ss << val;
-                log("Producer", ss.str().c_str());
+                myLog("Producer", ss.str().c_str());
 
                 boost::posix_time::milliseconds delay(50);
                 boost::this_thread::sleep(delay);
                 workMutex.unlock();
             } else {
-                log("Producer", "---");
+                myLog("Producer", "---");
             }
 
             // Slow things down a little
@@ -153,14 +153,14 @@ public:
 
                     std::stringstream ss;
                     ss << val;
-                    log("Consumer", ss.str().c_str());
+                    myLog("Consumer", ss.str().c_str());
                 }
 
                 boost::posix_time::milliseconds delay(50);
                 boost::this_thread::sleep(delay);
                 workMutex.unlock();
             } else {
-                log("Consumer", "---");
+                myLog("Consumer", "---");
             }
 
             // Slow things down a little
@@ -170,6 +170,74 @@ public:
     }
 };
 
+class TimedLockHolding : public Thread {
+public:
+    TimedLockHolding(boost::timed_mutex * _tMutex) { tMutex = _tMutex; }
+    virtual void start() {
+        threadRunning = true;
+        this->thread = boost::thread(&TimedLockHolding::execute, this);
+    }
+    virtual void execute() {
+        namespace place = std::placeholders;
+        auto log = std::bind(myLog, "TimedHolding", place::_1);
+        log("Starting");
+
+        while(threadRunning) {
+            log("Idling");
+            boost::posix_time::milliseconds idleTime(500);
+            boost::this_thread::sleep(idleTime);
+
+            log("Locking");
+            tMutex->lock();
+
+            log("Working");
+            boost::posix_time::milliseconds holdTime(2000);
+            boost::this_thread::sleep(holdTime);
+
+            tMutex->unlock();
+            log("Unlocked");
+        }
+        log("Finished");
+    }
+private:
+    boost::timed_mutex * tMutex;
+};
+
+class TimedLockTrying : public Thread {
+public:
+    TimedLockTrying(boost::timed_mutex * _tMutex) { tMutex = _tMutex; }
+    virtual void start() {
+        threadRunning = true;
+        this->thread = boost::thread(&TimedLockTrying::execute, this);
+    }
+    virtual void execute() {
+        namespace place = std::placeholders;
+        auto log = std::bind(myLog, "TimedTrying", place::_1);
+        log("Starting");
+
+        while(threadRunning) {
+            log("Idling");
+            boost::posix_time::milliseconds idleTime(600);
+            boost::this_thread::sleep(idleTime);
+
+            log("Locking");
+            boost::posix_time::time_duration lockTimeout(0, 0, 1); // hours, mins, secs
+            if (tMutex->timed_lock(lockTimeout)) {
+                log("Working");
+                boost::posix_time::milliseconds holdTime(400);
+                boost::this_thread::sleep(holdTime);
+
+                tMutex->unlock();
+                log("Unlocked");
+            } else {
+                log(">>> Timedout on lock.");
+            }
+        }
+        log("Finished");
+    }
+private:
+    boost::timed_mutex * tMutex;
+};
 /****************** Global Functions **********************/
 TEST(BoostThread, AcquireMutex) {
     std::srand(std::time(NULL));
@@ -181,14 +249,30 @@ TEST(BoostThread, AcquireMutex) {
     boost::posix_time::milliseconds workTime(2000);
     boost::this_thread::sleep(workTime);
 
-    log("AcquireMutex", "Shutting down Producer");
+    myLog("AcquireMutex", "Shutting down Producer");
     producer.stop();
-    producer.join();
 
     boost::this_thread::sleep(workTime);
-    log("AcquireMutex", "Shutting down Consumer");
+    myLog("AcquireMutex", "Shutting down Consumer");
     consumer.stop();
     consumer.join();
+    producer.join();
+}
+
+TEST(BoostThread, TimedMutex) {
+    boost::timed_mutex tMutex;
+    TimedLockHolding timeHold(&tMutex);
+    TimedLockTrying timeTry(&tMutex);
+    timeHold.start();
+    timeTry.start();
+
+    boost::posix_time::milliseconds workTime(6000);
+    boost::this_thread::sleep(workTime);
+
+    timeHold.stop();
+    timeTry.stop();
+    timeHold.join();
+    timeTry.join();
 }
 
 /* Notes:

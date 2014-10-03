@@ -91,12 +91,12 @@ protected:
 
     virtual void TearDown() {
         boost::log::core::get()->reset_filter();
-        //if (boost::filesystem::exists(SAMPLE_LOG)) {
-            //std::remove(SAMPLE_LOG);
-        //}
-        //if (boost::filesystem::exists("sample_0.log")) {
-            //std::remove("sample_0.log");
-        //}
+        if (boost::filesystem::exists(SAMPLE_LOG)) {
+            std::remove(SAMPLE_LOG);
+        }
+        if (boost::filesystem::exists("sample_0.log")) {
+            std::remove("sample_0.log");
+        }
     }
 private:
 };

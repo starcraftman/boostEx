@@ -56,6 +56,7 @@ using std::endl;
 using std::string;
 using MyUtil::myLog;
 using MyUtil::randInt;
+namespace place = std::placeholders;
 
 /******************* Type Definitions *********************/
 typedef std::vector<int> queue_t;
@@ -161,7 +162,6 @@ public:
         this->thread = boost::thread(&TimedLockHolding::execute, this);
     }
     virtual void execute() {
-        namespace place = std::placeholders;
         auto log = std::bind(myLog, "TimedHolding", place::_1);
         log("Starting");
 
@@ -194,7 +194,6 @@ public:
         this->thread = boost::thread(&TimedLockTrying::execute, this);
     }
     virtual void execute() {
-        namespace place = std::placeholders;
         auto log = std::bind(myLog, "TimedTrying", place::_1);
         log("Starting");
 
@@ -231,7 +230,6 @@ public:
         this->thread = boost::thread(&LockGuardHold::execute, this);
     }
     virtual void execute() {
-        namespace place = std::placeholders;
         auto log = std::bind(myLog, "LockGuardHold", place::_1);
         log("Starting");
 
@@ -248,6 +246,33 @@ public:
         log("Finished");
     }
 };
+
+class BoostConditional : public ::testing::Test {
+protected:
+    virtual void SetUp() {
+        workerDone = false;
+    }
+
+    virtual void TearDown() {
+    }
+
+    boost::mutex ioMutex;
+    bool workerDone;
+    boost::condition_variable condVar;
+};
+
+void workFunc(bool * workerDone, boost::condition_variable * cond) {
+    auto log = std::bind(myLog, "WorkerFunc", place::_1);
+    log("Wait a little..");
+    boost::this_thread::sleep(boost::posix_time::seconds(1));
+
+    log("Notify condition var");
+    *workerDone = true;
+    cond->notify_one();
+
+    log("Waiting more");
+    boost::this_thread::sleep(boost::posix_time::seconds(1));
+}
 
 /****************** Global Functions **********************/
 TEST(BoostMutex, AcquireMutex) {
@@ -294,6 +319,22 @@ TEST(BoostMutex, LockGuard) {
 
     timeHold.stop();
     timeTry.stop();
+}
+
+TEST_F(BoostConditional, SimpleWait) {
+    auto log = std::bind(myLog, "SimpleWait", place::_1);
+    log("Starting");
+    boost::mutex::scoped_lock lock(ioMutex);
+    boost::thread workThread(&workFunc, &workerDone, &condVar);
+
+    while (!workerDone) {
+        log("Waiting on lock");
+        condVar.wait(lock);
+    }
+
+    log("Condition Notified");
+    workThread.join();
+    log("Thread finished");
 }
 
 /* Notes:

@@ -44,6 +44,7 @@
 #include <boost/date_time.hpp>
 #include <boost/thread.hpp>
 #include <gtest/gtest.h>
+#include "util.hpp"
 
 /******************* Constants/Macros *********************/
 #define MAX_SLEEP_TIME_ms 500
@@ -53,50 +54,32 @@ using std::cin;
 using std::cout;
 using std::endl;
 using std::string;
+using MyUtil::myLog;
+using MyUtil::randInt;
 
 /******************* Type Definitions *********************/
 typedef std::vector<int> queue_t;
 typedef std::vector<std::string> vecStr_t;
 
 /****************** Class Definitions *********************/
-int randInt() {
-    static std::default_random_engine gGenerator;
-    static std::uniform_int_distribution<int> gDistribution(0, 32*1024);
-
-    return gDistribution(gGenerator);
-}
-
-/* Simple logger wrapper, format: [date] tag: msg\n */
-void myLog(const char* const tag, const char* const msg) {
-    std::stringstream ss;
-    ss << "[" << boost::posix_time::second_clock::local_time() << "] "
-        << tag << ": " << msg << endl; cout << ss.str();
-}
-
-void log(const std::string tag, const std::string msg) {
-    myLog(tag.c_str(), msg.c_str());
-}
-
-template <typename T>
-void log(const std::string tag, const T list) {
-    std::stringstream ss;
-    for (auto word : list) {
-        ss << word << " ";
-    }
-
-    myLog(tag.c_str(), ss.str().c_str());
-}
-
 class Thread {
 public:
-    Thread() : threadRunning(false) { }
+    Thread() : threadRunning(true) { }
     virtual ~Thread() {}
 
     virtual void execute() = 0;
     virtual void start() = 0;
-    inline void stop() { threadRunning = false; }
-    inline void join() { thread.join(); }
+    inline void stop() {
+        threadRunning = false;
+        thread.join();
+    }
     inline bool isRunning() { return threadRunning; }
+    /* Sleep for between 0 & maxTime. */
+    void randomDelay(int maxTime) {
+        boost::this_thread::disable_interruption di;
+        boost::posix_time::milliseconds delay(randInt(maxTime));
+        boost::this_thread::sleep(delay);
+    }
 
 protected:
     bool threadRunning;
@@ -199,7 +182,7 @@ public:
         }
         log("Finished");
     }
-private:
+protected:
     boost::timed_mutex * tMutex;
 };
 
@@ -235,11 +218,39 @@ public:
         }
         log("Finished");
     }
-private:
+protected:
     boost::timed_mutex * tMutex;
 };
+
+class LockGuardHold : public TimedLockHolding {
+public:
+    LockGuardHold(boost::timed_mutex * _tMutex) :
+        TimedLockHolding(_tMutex) {}
+    virtual void start() {
+        threadRunning = true;
+        this->thread = boost::thread(&LockGuardHold::execute, this);
+    }
+    virtual void execute() {
+        namespace place = std::placeholders;
+        auto log = std::bind(myLog, "LockGuardHold", place::_1);
+        log("Starting");
+
+        while(threadRunning) {
+            log("Holding thread for 2 seconds.");
+
+            {
+                boost::lock_guard<boost::timed_mutex> guard(*tMutex);
+                boost::posix_time::milliseconds holdTime(1110);
+                boost::this_thread::sleep(holdTime);
+            }
+            log("Lock released.");
+        }
+        log("Finished");
+    }
+};
+
 /****************** Global Functions **********************/
-TEST(BoostThread, AcquireMutex) {
+TEST(BoostMutex, AcquireMutex) {
     std::srand(std::time(NULL));
     ProducerTryLock producer;
     ConsumerTryLock consumer;
@@ -255,11 +266,9 @@ TEST(BoostThread, AcquireMutex) {
     boost::this_thread::sleep(workTime);
     myLog("AcquireMutex", "Shutting down Consumer");
     consumer.stop();
-    consumer.join();
-    producer.join();
 }
 
-TEST(BoostThread, TimedMutex) {
+TEST(BoostMutex, TimedMutex) {
     boost::timed_mutex tMutex;
     TimedLockHolding timeHold(&tMutex);
     TimedLockTrying timeTry(&tMutex);
@@ -271,8 +280,20 @@ TEST(BoostThread, TimedMutex) {
 
     timeHold.stop();
     timeTry.stop();
-    timeHold.join();
-    timeTry.join();
+}
+
+TEST(BoostMutex, LockGuard) {
+    boost::timed_mutex tMutex;
+    LockGuardHold timeHold(&tMutex);
+    TimedLockTrying timeTry(&tMutex);
+    timeHold.start();
+    timeTry.start();
+
+    boost::posix_time::milliseconds workTime(6000);
+    boost::this_thread::sleep(workTime);
+
+    timeHold.stop();
+    timeTry.stop();
 }
 
 /* Notes:

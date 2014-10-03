@@ -26,7 +26,7 @@
 //#include <utility> // Has pair for map.
 //#include <algorithm>
 //#include <numeric>
-//#include <functional> // Functional objects.
+#include <functional> // Functional objects.
 //#include <iterator> // Contains back_inserter function and like.
 
 /* C Headers */
@@ -43,6 +43,7 @@
 #include <boost/foreach.hpp>
 #include <boost/thread.hpp>
 #include <gtest/gtest.h>
+#include "util.hpp"
 
 /******************* Constants/Macros *********************/
 
@@ -138,6 +139,15 @@ double computeRoot(int num, double guess, int iters) {
     return x;
 }
 
+void dummy() {
+    namespace place = std::placeholders;
+    auto log = std::bind(MyUtil::myLog, "DummyFunc", place::_1);
+    log("Starting");
+
+    boost::posix_time::milliseconds delay(1100);
+    boost::this_thread::sleep(delay);
+}
+
 TEST(BoostThreads, SimpleExecute) {
     cout << endl << "Main: Startup." << endl;
 
@@ -165,6 +175,15 @@ TEST(BoostThreads, ObjectThreadWorker) {
     cout << "Main: Waiting." << endl;
     worker.join();
     cout << "Main: Finished." << endl;
+}
+
+TEST(BoostThreads, ThreadAttributes) {
+    boost::thread::attributes attrs;
+    std::size_t t_stackSize = attrs.get_stack_size();
+    attrs.set_stack_size(t_stackSize * 2);
+
+    boost::thread t(dummy);
+    cout << "ThreadAttributes" << t.get_id() << endl;
 }
 /* Notes:
  * Force call to use another version of virtual function: baseP->Item_base::net_price(42);

@@ -42,6 +42,8 @@
 #include <boost/date_time.hpp>
 #include <boost/foreach.hpp>
 #include <boost/thread.hpp>
+#include <boost/thread/lockable_adapter.hpp>
+#include <boost/thread/scoped_thread.hpp>
 #include <gtest/gtest.h>
 #include "util.hpp"
 
@@ -146,6 +148,8 @@ void dummy() {
 
     boost::posix_time::milliseconds delay(1100);
     boost::this_thread::sleep(delay);
+
+    log("Finished");
 }
 
 TEST(BoostThreads, SimpleExecute) {
@@ -184,6 +188,13 @@ TEST(BoostThreads, ThreadAttributes) {
 
     boost::thread t(dummy);
     cout << "ThreadAttributes" << t.get_id() << endl;
+}
+
+TEST(BoostThreads, ScopedThread) {
+    /* Scoped threads join on losing focus. */
+    MyUtil::myLog("ScopedThread", "Creating Thread");
+    boost::scoped_thread<> t((boost::thread(dummy)));
+    MyUtil::myLog("ScopedThread", "Going Out Of Scope");
 }
 /* Notes:
  * Force call to use another version of virtual function: baseP->Item_base::net_price(42);

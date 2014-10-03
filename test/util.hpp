@@ -56,6 +56,7 @@ namespace MyUtil {
         ss << "[" << boost::posix_time::second_clock::local_time() << "] "
             << tag << ": " << msg << std::endl;
         std::cout << ss.str();
+        std::cout.flush();
     }
 
     template <typename T>

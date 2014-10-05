@@ -54,7 +54,7 @@ for arg; do
       echo "Executing Python code."
       ./python/run.py
       ;;
-    *) # Default is to run
+    *)
       echo "Invalid command, see the help."
       ;;
   esac

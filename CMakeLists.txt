@@ -5,6 +5,7 @@ OPTION(StaticBoost "StaticBoost" ON)
 OPTION(ProgOpts "ProgOpts" OFF)
 OPTION(Python "Python" OFF)
 OPTION(Test "Test" OFF)
+OPTION(StdNew "StdNew" OFF)
 
 IF(StaticBoost)
     SET(Boost_USE_STATIC_LIBS ON)
@@ -17,6 +18,7 @@ SET(BOOST_ROOT  "${CMAKE_SOURCE_DIR}/libs")
 SET(GTEST_ROOT  "${BOOST_ROOT}")
 SET(BOOST_EXE "BoostTest")
 SET(PY_LIB   "Boost")
+SET(STD_EXE "StdNew")
 
 FIND_PACKAGE(Boost 1.56.0 REQUIRED chrono date_time filesystem log log_setup
     program_options python system thread)
@@ -28,11 +30,14 @@ INCLUDE_DIRECTORIES(
     ${Boost_INCLUDE_DIR}
     ${GTEST_INCLUDE_DIRS}
     ${PYTHON_INCLUDE_DIRS}
+    ${CMAKE_SOURCE_DIR}/test
+    ${CMAKE_SOURCE_DIR}/stdNew
 )
 
 ADD_SUBDIRECTORY(test)
 ADD_SUBDIRECTORY(progOpts)
 ADD_SUBDIRECTORY(python)
+ADD_SUBDIRECTORY(stdNew)
 
 IF(Test)
     ADD_EXECUTABLE(${BOOST_EXE} ${TEST_SOURCES})
@@ -82,6 +87,14 @@ IF(Python)
         ${CMAKE_BINARY_DIR}/libBoost.so ${CMAKE_SOURCE_DIR}/python
     )
 ENDIF(Python)
+
+IF(StdNew)
+    ADD_EXECUTABLE(${STD_EXE} ${STD_SOURCES})
+    TARGET_LINK_LIBRARIES(${STD_EXE}
+        ${CMAKE_THREAD_LIBS_INIT}
+        ${GTEST_BOTH_LIBRARIES}
+    )
+ENDIF(StdNew)
 
 # Debug
 #GET_CMAKE_PROPERTY(_variablenames variables)

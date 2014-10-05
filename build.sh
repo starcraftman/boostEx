@@ -44,6 +44,10 @@ for arg; do
       mkdir -p "$BDIR"
       touch "$BDIR/DUMMY"
       ;;
+    "std")
+      build -DStdNew=ON
+      $BDIR/StdNew
+      ;;
     "test")
       build -DTest=ON
       $BDIR/BoostTest

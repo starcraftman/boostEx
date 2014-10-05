@@ -122,7 +122,7 @@ private:
 
 /****************** Global Functions **********************/
 /* Simple test func. */
-void workerFunc1(string &msg) {
+static void workerFunc1(string &msg) {
     boost::posix_time::seconds workTime(1);
 
     cout << "Worker: Running." << endl;
@@ -131,7 +131,7 @@ void workerFunc1(string &msg) {
     cout << "Worker: Finished." << endl;
 }
 
-double computeRoot(int num, double guess, int iters) {
+static double computeRoot(int num, double guess, int iters) {
     double x = guess;
     for (int i = 0; i < iters; ++i) {
         double fX = (x * x) - num;
@@ -141,7 +141,7 @@ double computeRoot(int num, double guess, int iters) {
     return x;
 }
 
-void dummy() {
+static void dummy() {
     namespace place = std::placeholders;
     auto log = std::bind(MyUtil::myLog, "DummyFunc", place::_1);
     log("Starting");

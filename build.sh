@@ -28,6 +28,11 @@ build() {
   popd
 }
 
+if [ -z "$1" ]; then
+  usage
+  exit
+fi
+
 for arg; do
   case "$arg" in
     "--help"|"-h"|"help")

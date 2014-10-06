@@ -6,39 +6,51 @@
 /* C++ Headers */
 #include <iostream> /* Input/output objects. */
 //#include <fstream> /* File operations. */
-//#include <sstream> /* String stream. */
+#include <sstream> /* String stream. */
 #include <string> /* C++ String class. */
-//#include <new> /* Defines bad_malloc exception, new functions. */
-//#include <typeinfo> /* Casting header. */
 //#include <exception> /* Top level exception header. */
-//#include <stdexcept> /* Derived exception classes. */
+//#include <stdexcept> /* Some useful common exceptions */
+//#include <new> /* Defines bad_malloc exception, new functions. */
+//#include <memory> /* std smart pointers like unique_ptr */
+//#include <typeinfo> /* Casting header. */
+//#include <limits> /* Inspect properties, numeric_limits<int> iLimit; */
+//#include <numeric> /* Math accumulators & other ops*/
+#include <functional> /* Function declarations & std::bind */
+
+/* C++11 Only*/
+#include <chrono> /* std::chrono contains timing for threads */
+//#include <initializer_list> /* Allows class to take list like {1,2} */
+//#include <random> /* Random c++ version */
 #include <thread>
-#include <chrono>
+//#include <atomic>
+#include <condition_variable>
+#include <mutex>
 
 /* STL Headers */
-#include <vector>
+//#include <vector>
 //#include <list>
 //#include <deque>
 //#include <stack>
 //#include <queue>
 //#include <priority_queue>
-//#include <bitset>
 //#include <set> // multiset for multiple keys allowed.
 //#include <map> // multimap for multiple keys allowed.
+//#include <bitset>
 //#include <utility> // Has pair for map.
 //#include <algorithm>
-//#include <numeric>
-#include <functional> // Functional objects.
 //#include <iterator> // Contains back_inserter function and like.
 
 /* C Headers */
-//#include <cstdlib>
-//#include <cstddef>
-//#include <cctype>
-//#include <cstring>
 //#include <cstdio>
+//#include <cstring>
+//#include <cstdlib> /* atof, rand, malloc... */
+//#include <cstddef> /* size_t, NULL */
+//#include <cstdarg> /* Variable argument functions */
+//#include <cctype> /* Character check functions */
 //#include <climits>
 //#include <cassert>
+//$include <cmath>
+//$include <cstdint> /* C++11 only, standard u_int16 & such */
 
 /* Project Headers */
 #include <gtest/gtest.h>
@@ -67,65 +79,18 @@ using std::string;
  */
 
 /****************** Class Definitions *********************/
-//double computeRoot(double num, double guess, int iterations);
-
-//class Worker {
-//public:
-    //Worker(double num, double guess, int iterations) :
-        //_num(num), _guess(guess), _iterations(iterations) { }
-
-    //void operator()() {
-        //double x = _guess;
-        //for (int i = 0; i < _iterations; ++i) {
-            //double fX = (x * x) - _num;
-            //x = x - (fX / (2 * x));
-        //}
-        //std::printf("The root of %f is %f.\n", _num, x);
-    //}
-
-//private:
-    //double _num, _guess;
-    //int _iterations;
-//};
-
-//class WorkerObj {
-//public:
-    //WorkerObj(double num, double guess, int iterations) :
-        //_num(num), _guess(guess), _iterations(iterations) { }
-
-    //void computeRoot() {
-        //cout << "Worker Started." << endl;
-        //double x = _guess;
-        //for (int i = 0; i < _iterations; ++i) {
-            //double fX = (x * x) - _num;
-            //x = x - (fX / (2 * x));
-        //}
-        //std::printf("The root of %f is %f.\n", _num, x);
-    //}
-
-    //void start() {
-        //_thread = boost::thread(&WorkerObj::computeRoot, this);
-    //}
-
-    //void join() {
-        //_thread.join();
-    //}
-
-//private:
-    //double _num, _guess;
-    //int _iterations;
-    //boost::thread  _thread;
-//};
 
 /****************** Global Functions **********************/
-/* Simple test func. */
-static void workerFunc1(string &msg) {
-    const std::chrono::milliseconds workTime(1000);
+/* Sjimple test func. */
+static void worker1(const string &msg) {
+    const auto log = std::bind(MyUtil::myLog, "Worker1", std::placeholders::_1);
 
-    cout << "Worker: Running." << endl;
     cout << msg << endl;
+
+    log("Working...");
+    const std::chrono::milliseconds workTime(1000);
     std::this_thread::sleep_for(workTime);
-    cout << "Worker: Finished." << endl;
+    log("Finished");
 }
 
 static double computeRoot(int num, double guess, int iters) {
@@ -138,61 +103,33 @@ static double computeRoot(int num, double guess, int iters) {
     return x;
 }
 
-//void dummy() {
-    //namespace place = std::placeholders;
-    //auto log = std::bind(MyUtil::myLog, "DummyFunc", place::_1);
-
-    //boost::posix_time::milliseconds delay(1100);
-    //boost::this_thread::sleep(delay);
-
-    //log("Finished");
-//}
-
-TEST(StdThreads, SimpleExecute) {
-    cout << endl << "Main: Startup." << endl;
-    string msg("Hello world.");
-
-    std::thread w1(workerFunc1, std::ref(msg));
-    cout << "Main: Waiting." << endl;
-    w1.join();
-    cout << "Main: Finished." << endl;
+static void worker2() {
+    std::stringstream ss;
+    ss << "The root of " << 6822 << " is " << computeRoot(6822, 20, 10);
+    MyUtil::myLog("Worker2", ss.str().c_str());
 }
 
-//TEST(BoostThreads, ComputeRoot) {
-    //cout << endl << "Main: Startup." << endl;
+TEST(StdThreads, SimpleExecute) {
+    const auto log = std::bind(MyUtil::myLog, "SimpleExecute", std::placeholders::_1);
+    log("Starting");
 
-    //Worker worker(612, 10, 10);
-    //boost::thread workThread(worker);
-    //cout << "Main: Waiting." << endl;
-    //workThread.join();
-    //cout << "Main: Finished." << endl;
-//}
+    string msg("Hello world.");
+    std::thread worker(worker1, std::ref(msg));
+    log("Waiting on thread");
+    worker.join();
+    log("Finished");
+}
 
-//TEST(BoostThreads, ObjectThreadWorker) {
-    //cout << endl << "Main: Startup." << endl;
+TEST(StdThreads, ComputeRoot) {
+    const auto log = std::bind(MyUtil::myLog, "StdThreads", std::placeholders::_1);
+    log("Starting");
 
-    //WorkerObj worker(900, 15, 10);
-    //worker.start();
-    //cout << "Main: Waiting." << endl;
-    //worker.join();
-    //cout << "Main: Finished." << endl;
-//}
+    std::thread worker(worker2);
+    log("Waiting on thread");
+    worker.join();
+    log("Finished");
+}
 
-//TEST(BoostThreads, ThreadAttributes) {
-    //boost::thread::attributes attrs;
-    //std::size_t t_stackSize = attrs.get_stack_size();
-    //attrs.set_stack_size(t_stackSize * 2);
-
-    //boost::thread t(dummy);
-    //cout << "ThreadAttributes" << t.get_id() << endl;
-//}
-
-//TEST(BoostThreads, ScopedThread) {
-     //Scoped threads join on losing focus.
-    //MyUtil::myLog("ScopedThread", "Creating Thread");
-    //boost::scoped_thread<> t((boost::thread(dummy)));
-    //MyUtil::myLog("ScopedThread", "Going Out Of Scope");
-//}
 /* Notes:
  * Force call to use another version of virtual function: baseP->Item_base::net_price(42);
  *

@@ -10,6 +10,7 @@ SET(TEST_SOURCES
     "${CMAKE_CURRENT_SOURCE_DIR}/log_test.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/prop_tree_test.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/smart_ptrs_test.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/algorithm_test.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/threads_create_test.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/threads_mutex_test.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/tokenizer_test.cpp"

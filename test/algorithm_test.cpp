@@ -1,6 +1,5 @@
 /**
- * Template C++ file.
- * Function with references to pointers: func(int *&ptr);
+ * String algorithms from: http://www.boost.org/doc/libs/1_56_0/doc/html/string_algo/quickref.html#idp432359984
  */
 /********************* Header Files ***********************/
 /* C++ Headers */
@@ -36,8 +35,8 @@
 //#include <set> // multiset for multiple keys allowed.
 //#include <map> // multimap for multiple keys allowed.
 //#include <bitset>
-#include <utility> // Has pair for map, std::swap
-#include <algorithm>
+//#include <utility> // Has pair for map, std::swap
+//#include <algorithm>
 //#include <iterator> // Contains back_inserter function and like.
 
 /* C Headers */
@@ -52,17 +51,15 @@
 //$include <cmath>
 //$include <cstdint> /* C++11 only, standard u_int16 & such */
 
-#include <boost/graph/graph_traits.hpp>
-#include <boost/graph/adjacency_list.hpp>
-#include <boost/graph/dijkstra_shortest_paths.hpp>
-#include <gtest/gtest.h>
+#include <boost/algorithm/string.hpp>
+#include <boost/algorithm/minmax.hpp>
+#include "gtest/gtest.h"
 
 /**************** Namespace Declarations ******************/
 using std::cin;
 using std::cout;
 using std::endl;
 using std::string;
-namespace bg = boost::graph;
 
 /******************* Type Definitions *********************/
 /* For enums: Try to namesapce the common elements.
@@ -84,25 +81,18 @@ namespace bg = boost::graph;
 
 
 /************** Global Vars & Functions *******************/
-TEST(DISABLED_BoostGraph, CreateAdjList) {
-    typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::bidirectionalS> Graph;
+TEST(BoostString, BasicStringOps) {
+    std::string word("Help"), w2("Help");
 
-    enum { A, B, C, D, E, N };
-    const int num_vertices = N;
-    const char * name = "ABCDE";
+    ASSERT_STREQ("HELP", boost::to_upper_copy(word).c_str());
+    ASSERT_STREQ("help", boost::to_lower_copy(word).c_str());
 
-    typedef std::pair<int, int> Edge;
-    Edge edge_array[] = {
-        Edge(A, B), Edge(A, D), Edge(C, A), Edge(D, C),
-        Edge(C, E), Edge(B, D), Edge(D, E)
-    };
-    const int num_edges = sizeof(edge_array)/sizeof(edge_array[0]);
-
-    Graph g(edge_array, edge_array + num_edges, num_vertices);
-
-    typedef boost::graph_traits<Graph>::vertex_descriptor Vertex;
-    typedef boost::property_map<Graph, boost::vertex_index_t>::type IndexMap;
+    ASSERT_TRUE(boost::starts_with(word, "Hel"));
+    ASSERT_TRUE(boost::contains(word, "Hel"));
+    ASSERT_TRUE(boost::equals("Hello", "Hello"));
+    ASSERT_TRUE(boost::equals(word, w2));
 }
+
 
 /* Notes:
  * Force call to use another version of virtual function: baseP->Item_base::net_price(42);

@@ -35,30 +35,30 @@ fi
 
 for arg; do
   case "$arg" in
-    "--help"|"-h"|"help")
+    *help|-h)
       usage
       exit
       ;;
-    "clean")
+    clean)
       rm -rf "$BDIR" "python/libBoost.so"
       mkdir -p "$BDIR"
       touch "$BDIR/DUMMY"
       ;;
-    "std")
+    std*)
       build -DStdNew=ON
       $BDIR/StdNew
       ;;
-    "test")
+    test*)
       build -DTest=ON
       $BDIR/BoostTest
       ;;
-    "progOpts")
+    progOpts*)
       build -DProgOpts=ON
       echo "Run programs separately, see --help."
       echo "The programs available are: "
       echo ./gen/ProgOpts*
       ;;
-    "python")
+    python*)
       build -DPython=ON -DStaticBoost=OFF
       echo "Executing Python code."
       ./python/run.py

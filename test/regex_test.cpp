@@ -141,7 +141,10 @@ TEST(BoostRegex, RegexTokenIterator) {
             boost::sregex_token_iterator(), std::back_inserter(actual));
 
     std::vector<string> expect;
-    boost::split(expect, s, boost::is_any_of(" "));
+    boost::split(expect, s, [](char c) -> bool { return c == ' '; });
+    //std::set<char> setS = {' '};
+    //boost::split(expect, s, boost::is_any_of(setS));
+
     ASSERT_EQ(expect.size(), actual.size());
     std::vector<string>::const_iterator itE = expect.begin();
     for (auto act : actual) {

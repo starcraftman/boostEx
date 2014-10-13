@@ -21,7 +21,7 @@ SET(PY_LIB   "Boost")
 SET(STD_EXE "StdNew")
 
 FIND_PACKAGE(Boost 1.56.0 REQUIRED chrono date_time filesystem log log_setup
-    program_options python system thread)
+    program_options python regex system thread)
 FIND_PACKAGE(GTest 1.7 REQUIRED)
 FIND_PACKAGE(Threads REQUIRED)
 FIND_PACKAGE(PythonLibs 2 REQUIRED)

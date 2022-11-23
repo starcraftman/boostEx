@@ -199,7 +199,26 @@ def extract_archive(archive):
 
     if arc_ext in ['.tgz', '.tbz2', '.tar.bz2', '.tar.gz']:
         with tarfile.open(archive) as tarf:
-            tarf.extractall()
+            def is_within_directory(directory, target):
+                
+                abs_directory = os.path.abspath(directory)
+                abs_target = os.path.abspath(target)
+            
+                prefix = os.path.commonprefix([abs_directory, abs_target])
+                
+                return prefix == abs_directory
+            
+            def safe_extract(tar, path=".", members=None, *, numeric_owner=False):
+            
+                for member in tar.getmembers():
+                    member_path = os.path.join(path, member.name)
+                    if not is_within_directory(path, member_path):
+                        raise Exception("Attempted Path Traversal in Tar File")
+            
+                tar.extractall(path, members, numeric_owner=numeric_owner) 
+                
+            
+            safe_extract(tarf)
     elif arc_ext == '.zip':
         with zipfile.ZipFile(archive) as zipf:
             zipf.extractall()
